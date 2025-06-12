@@ -284,7 +284,8 @@ def api_search_users():
                 "id": user.id,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
-                "friend_status": friend_status
+                "friend_status": friend_status,
+                "image_file" : url_for('static', filename='profile_pics/' + user.image_file)
             })
             print(f"Friend status for {user.first_name}: {friend_status}")
         # Return as JSON
@@ -329,11 +330,11 @@ def cancel_friend_request(receiver_id):
 
     # Find the pending request from user to the receiver
     #you can only use .get if the value is a primary key
-    request = FriendRequest.query.filter_by(
-        requester_id=user_id,
-        receiver_id=receiver_id,
-        status="pending"
-    ).first()
+    request = FriendRequest.query.filter(
+    ((FriendRequest.requester_id == user_id) & (FriendRequest.receiver_id == receiver_id)) |
+    ((FriendRequest.requester_id == receiver_id) & (FriendRequest.receiver_id == user_id)),
+    FriendRequest.status == "pending").first()
+
 
     if request:
         print(f"Cancelled friend request from user {user_id} to user {receiver_id}")
@@ -371,11 +372,11 @@ def accept_friend(requester_id):
 
     # Find the pending request from user to the receiver
     #you can only use .get if the value is a primary key
-    request = FriendRequest.query.filter_by(
-        receiver_id = user_id,
-        requester_id = requester_id,
-        status="pending"
-    ).first()
+    request = FriendRequest.query.filter(
+    ((FriendRequest.requester_id == user_id) & (FriendRequest.receiver_id == requester_id)) |
+    ((FriendRequest.requester_id == requester_id) & (FriendRequest.receiver_id == user_id)),
+    FriendRequest.status == "pending").first()
+
 
     
     if friend not in user.friends:
@@ -427,7 +428,8 @@ def show_friend_requests():
                 "id": requester.id,
                 "first_name": requester.first_name,
                 "last_name": requester.last_name,
-                "friend_status": request.status
+                "friend_status": request.status,
+                "image_file" : url_for('static', filename='profile_pics/' + requester.image_file)
         })
 
     return jsonify(users=users)
@@ -453,7 +455,8 @@ def api_view_friends():
             "id": friend.id,
             "first_name": friend.first_name,
             "last_name": friend.last_name,
-            "status": "accepted" 
+            "friend_status": "accepted",
+            "image_file" : url_for('static', filename='profile_pics/' + friend.image_file)
         })
     return jsonify(friends=friends_list)
 
@@ -624,7 +627,7 @@ def edit_workout(workout_id):
         form.seconds.data = total_seconds % 60
         
         return render_template("edit_workout.html", form=form, workout_id=workout_id)
-    
+
     if form.validate_on_submit():
         if form.update.data:
             print("Form validated and submitted")
@@ -657,6 +660,42 @@ def edit_workout(workout_id):
     #need to pass workout_id so it can be defined in jinja code
     return render_template("edit_workout.html", form=form, workout_id=workout_id)
 
+@app.route("/feed")
+def feed():
+    return render_template("feed.html")
+
+@app.route("/api_feed")
+def api_feed():
+    if "user" not in session:
+        return jsonify({"error": "Not logged in"})
+
+    #collect all friend workouts in order and display them 
+    user_id = session["user"]
+    user = User.query.get(user_id)
+    friends = user.friends
+    workouts = Workout.query.filter_by(user_id=friend.id).all()
+
+    friends_list = []
+    for friend in friends:
+        workouts_data = []
+        for workout in workouts:
+            workouts_data.append({
+                "id": workout.id,
+                "user_id": workout.user_id,
+                "exercise": workout.exercise,
+                "workout_title": workout.workout_title,
+                "duration_minutes": workout.duration_minutes,
+                #this is needed to ensure the corrrect utc string is passed
+                "date": workout.date.astimezone(timezone.utc).isoformat()
+        })
+        friends_list.append({
+            "id": friend.id,
+            "first_name": friend.first_name,
+            "last_name": friend.last_name,
+            "image_file" : url_for('static', filename='profile_pics/' + friend.image_file),
+            "workouts": workouts_data
+        })
+    return jsonify(friends=friends_list)
 
 
 if __name__ == "__main__":
