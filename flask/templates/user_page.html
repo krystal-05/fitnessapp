@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block content %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <p>{{msg}}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div>
+        <button class = "button"  onclick="window.location.href='/search_users'">Search User</button>
+    </div>
+    <div>
+        <button class = "button"  onclick="window.location.href='/show_requests'">requests</button>
+    </div>
+
+     <!-- Stats Grid -->
+     <div id="statsContainer"></div>
+     <template data-stats-template>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">Total Activities</div>
+            <div class="stat-value" data-activities></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Total Active Minutes</div>
+            <div class="stat-value" data-minutes></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Total Awards</div>
+            <div class="stat-value" data-awards></div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Activity Streak</div> 
+            <div class="stat-value" data-streak></div>
+          </div>
+        </div>
+      </template>
+</div>
+
+<script>
+const statsTemplate = document.querySelector("[data-stats-template]")
+const statsContainer = document.getElementById("statsContainer")
+//display total activities
+fetch("/user_page_api")
+    .then(response => response.json())
+    .then(data => {
+        //dont need to use map since single objects are being used, not an array
+        const card = statsTemplate.content.cloneNode(true);
+        const activities = card.querySelector("[data-activities]");
+        const minutes = card.querySelector("[data-minutes]");
+        const awards = card.querySelector("[data-awards]");
+        const streak = card.querySelector("[data-streak]");
+
+        activities.textContent = data.total_workouts;
+        minutes.textContent = data.total_minutes;
+        awards.textContent = data.awards;
+        streak.textContent = data.streak;
+
+        statsContainer.appendChild(card);
+  });
+
+
+</script>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+  }
+  
+  .profile-card {
+    background-color: #2e2e2e; /* dark gray card */
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    margin: auto;
+    padding: 32px;
+    padding-top: 16px;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); 
+  }
+  
+  .stat-item {
+    margin-bottom: 20px;
+  }
+  
+  .stat-label {
+    color: rgb(255, 115, 0);
+    font-weight: bold;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 30px;
+  }
+  
+  .stat-box {
+    background-color: #444;
+    color: rgb(255, 115, 0);
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 10px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+   
+    justify-content: center;
+    min-height: 100px;
+    text-align: center;
+  }
+  
+  .profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #aaa;
+    overflow: hidden;
+    margin: -25px auto 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .circle-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;      /* Keeps aspect ratio, crops if needed */
+    object-position: center;
+    border-radius: 50%;     /* Keeps it circular */
+  }
+  
+  .profile-name-placeholder {
+    width: 70%;
+    height: 60px;
+    background-color: #444;
+    margin: 10px auto 50px auto;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .name-text {
+    color: #fff;
+    font-weight: bold;
+    font-size: 32px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .settings-image{
+    margin-left: 400px;
+    filter: brightness(40) saturate(100%) invert(63%) sepia(89%) saturate(1270%) hue-rotate(359deg) brightness(105%) contrast(104%);
+  }
+
+  .styled-button {
+    background: none;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .settings-image:hover {
+    filter: brightness(0.6)
+  }
+  
+ 
+</style>
+{% endblock %}

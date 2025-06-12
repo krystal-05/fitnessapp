@@ -1,0 +1,14 @@
+
+{% block content %}
+    <head>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
+    </head>
+
+    
+<div>
+    <button class = "button"  onclick="window.location.href='/login'">Login</button>
+</div>
+<div>
+    <button class = "button"  onclick="window.location.href='/register'">Register</button>
+</div>
+{% endblock %}
