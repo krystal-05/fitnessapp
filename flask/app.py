@@ -92,14 +92,20 @@ def index():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+        users = User.query.all()
         #get data
         first_name = request.form["first_name"]
         last_name = request.form["last_name"]
         email = request.form["email"]
+        for user in users:
+            if email == user.email: 
+                flash("email already in use")
+                return render_template('register.html')
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
         if password != confirm_password:
-            return render_template('register.html', message="Passwords do not match.")
+            flash("Passwords do not match.")
+            return render_template('register.html')
         #hash the password for security
         hashed_password = generate_password_hash(password)
         #save data
@@ -458,7 +464,7 @@ def api_view_friends():
             "friend_status": "accepted",
             "image_file" : url_for('static', filename='profile_pics/' + friend.image_file)
         })
-    return jsonify(friends=friends_list)
+    return jsonify(users=friends_list)
 
 
 def save_picture(form_picture):
@@ -673,10 +679,10 @@ def api_feed():
     user_id = session["user"]
     user = User.query.get(user_id)
     friends = user.friends
-    workouts = Workout.query.filter_by(user_id=friend.id).all()
 
     friends_list = []
     for friend in friends:
+        workouts = Workout.query.filter_by(user_id=friend.id).all()
         workouts_data = []
         for workout in workouts:
             workouts_data.append({
@@ -695,7 +701,7 @@ def api_feed():
             "image_file" : url_for('static', filename='profile_pics/' + friend.image_file),
             "workouts": workouts_data
         })
-    return jsonify(friends=friends_list)
+    return jsonify(users=friends_list)
 
 
 if __name__ == "__main__":
