@@ -57,31 +57,9 @@
         </div>
       </template>
 </div>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+<script src="{{ url_for('static', filename='functions.js') }}"></script>
 
-<script>
-const statsTemplate = document.querySelector("[data-stats-template]")
-const statsContainer = document.getElementById("statsContainer")
-//display total activities
-fetch("/user_page_api")
-    .then(response => response.json())
-    .then(data => {
-        //dont need to use map since single objects are being used, not an array
-        const card = statsTemplate.content.cloneNode(true);
-        const activities = card.querySelector("[data-activities]");
-        const minutes = card.querySelector("[data-minutes]");
-        const awards = card.querySelector("[data-awards]");
-        const streak = card.querySelector("[data-streak]");
-
-        activities.textContent = data.total_workouts;
-        minutes.textContent = data.total_minutes;
-        awards.textContent = data.awards;
-        streak.textContent = data.streak;
-
-        statsContainer.appendChild(card);
-  });
-
-
-</script>
 <style>
   body {
     font-family: 'Segoe UI', sans-serif;

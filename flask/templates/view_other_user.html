@@ -23,8 +23,8 @@
     </div>
 
      <!-- Stats Grid -->
-     <div id="statsContainer"></div>
-     <template data-stats-template>
+     <div id="otherStatsContainer"></div>
+     <template data-other-stats-template>
         <div class="stats-grid">
           <div class="stat-box">
             <div class="stat-label">Total Activities</div>
@@ -49,33 +49,9 @@
 </div>
 </div>
 </div>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+<script src="{{ url_for('static', filename='functions.js') }}"></script>
 
-<script>
-const user_id = document.querySelector(".container").dataset.userId
-const statsTemplate = document.querySelector("[data-stats-template]");
-const statsContainer = document.getElementById("statsContainer");
-
-//display total activities
-fetch(`/view_other_user_api/${user_id}`)
-    .then(response => response.json())
-    .then(data => {
-        //dont need to use map since single objects are being used, not an array
-        const card = statsTemplate.content.cloneNode(true);
-        const activities = card.querySelector("[data-activities]");
-        const minutes = card.querySelector("[data-minutes]");
-        const awards = card.querySelector("[data-awards]");
-        const streak = card.querySelector("[data-streak]");
-
-        activities.textContent = data.total_workouts;
-        minutes.textContent = data.total_minutes;
-        awards.textContent = data.awards;
-        streak.textContent = data.streak;
-
-        statsContainer.appendChild(card);
-  });
-
-
-</script>
 <style>
     body {
     font-family: 'Segoe UI', sans-serif;

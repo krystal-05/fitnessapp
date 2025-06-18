@@ -7,11 +7,11 @@
 
 <div class="container my-5">
   <input type="search" class="form-control searchInput mb-4 mx-auto" placeholder="Search users..." data-search style="max-width: 400px;">
-  <div id="userContainer" class="d-flex flex-column gap-3"></div>
+  <div id="searchContainer" class="d-flex flex-column gap-3"></div>
 </div>
 
 
-<template data-user-template>
+<template data-search-template>
   <div class="card bg-dark text-white p-3" data-user-cards-container>
     <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
       <div class="profile_image" image-tag></div>
@@ -25,110 +25,9 @@
   </div>
 </template>
 
-<script>
-const userCardTemplate = document.querySelector("[data-user-template]");
-const userCardContainer = document.getElementById("userContainer");
-const searchInput = document.querySelector("[data-search]");
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+<script src="{{ url_for('static', filename='functions.js') }}"></script>
 
-let users = [];
-
-fetch("/api_search_users")
-  .then(response => response.json())
-  .then(data => {
-    users = data.users.map(user => {
-    const card = userCardTemplate.content.cloneNode(true).children[0];
-    const view_user = card.querySelector("[view-user-tag]");
-    const view_profile = card.querySelector("[view-profile-tag]");
-    const friend_button = card.querySelector("[friend-tag]");
-    const imageContainer= card.querySelector("[image-tag]");
-
-    //code to display the image
-    const img = document.createElement("img");
-    const profile_pic = user.image_file;
-    const fullName = `${user.first_name} ${user.last_name}`;
-
-    img.src = profile_pic; 
-    img.alt = fullName;
-    img.style.width = "50px";
-    img.style.height = "50px";
-    img.style.objectFit = "cover";
-    img.classList.add("rounded-circle");
-
-    imageContainer.appendChild(img);
-    
-    //text content code
-    view_user.textContent = fullName;
-    view_profile.textContent = "View Profile";
-    view_profile.addEventListener("click", () => {
-    window.location.href = `/view_other_user/${user.id}`;
-  });
-
-    friend_button.textContent =
-      user.friend_status === "accepted" ? "Remove Friend" :
-      user.friend_status === "pending" ? "Pending" :
-      user.friend_status === "none" ? "Add Friend" : "Add Friend";
-
-    friend_button.dataset.userId = user.id;
-    friend_button.dataset.status = user.friend_status;
-
-    // friend button 
-    friend_button.addEventListener("click", () => {
-      const userId = friend_button.dataset.userId;
-      const status = friend_button.dataset.status;
-
-      let endpoint = "";
-      if (status === "accepted") {
-        endpoint = `/remove_friend/${userId}`;
-      } else if (status === "pending") {
-        endpoint = `/cancel_friend_request/${userId}`;
-      } else {
-        endpoint = `/send_friend_request/${userId}`;
-      }
-
-    fetch(endpoint, { method: "POST" })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          friend_button.textContent = data.new_label;
-          friend_button.dataset.status = data.new_status;
-        }
-      });
-    });
-
-    card.style.display = "none";
-    userCardContainer.appendChild(card);
-
-    return {
-      name: fullName,
-      element: card,
-      friend_status: user.friend_status 
-    };
-  });
-});
-
-searchInput.addEventListener("input", (event) => {
-  const value = event.target.value;
-
-    // If the input is empty, keep everything hidden
-    if (value === "") {
-    users.forEach(user => {
-      user.element.style.display = "none";
-    });
-    return;
-  }
-  // ^ means "starts with"
-  // "i" makes it case-insensitive
-  const regex = new RegExp("^" + value, "i"); 
-
-  users.forEach(user => {
-    const isVisible = regex.test(user.name);
-    user.element.style.display = isVisible ? "block" : "none";
-  });
-});
-
-
-
-</script>
 <style>
   body {
     font-family: Arial, sans-serif;
