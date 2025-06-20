@@ -1,4 +1,30 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // ---------- BASE HTML CONTENT ----------
+  let menu = document.getElementById("dropdownMenu");
+  let button = document.getElementById("dropdownMenuButton");
+   function toggleDropdown() {
+       //add click event listener
+       if (menu.style.display === "none" || menu.style.display === "") {
+           menu.style.display = "block";
+       } else {
+           menu.style.display = "none";
+       }
+       
+   }
+    //get users time zone
+    document.addEventListener("DOMContentLoaded", function() {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+      // Send to backend if not already set
+      fetch("/set_timezone", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ timezone: timezone })
+      });
+  });
+
   // ---------- ADD WORKOUT PAGE ----------
   const exerciseOption = document.getElementById("exercise");
   if (exerciseOption) {
@@ -61,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fetch("/api_friends")
       .then(response => response.json())
       .then(data => {
-        data.users.forEach(user => {
+        const users = data.users.map(user => {
           const card = friendTemplate.content.cloneNode(true).children[0];
           createProfilePic(user, card);
           showProfile(user, card);
@@ -69,16 +95,23 @@ document.addEventListener("DOMContentLoaded", () => {
           setupFriendButton(user, card);
           card.style.display = "flex";
           friendContainer.appendChild(card);
-        });
+
+        return {
+          name: fullName,
+          element: card,
+          friend_status: user.friend_status
+        };
+      });
+        searchUser(users);
       });
   }
 
   // ---------- SEARCH USERS PAGE ----------
   const searchTemplate = document.querySelector("[data-search-template]");
   const searchContainer = document.getElementById("searchContainer");
-  const searchInput = document.querySelector("[data-search]");
-  const userCardContainer = document.getElementById("userCardContainer");
-  if (searchTemplate && searchContainer && searchInput && userCardContainer) {
+  
+
+  if (searchTemplate && searchContainer) {
     fetch("/api_search_users")
       .then(response => response.json())
       .then(data => {
@@ -89,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const fullName = showName(user, card);
           setupFriendButton(user, card);
           card.style.display = "none";
-          userCardContainer.appendChild(card);
+          searchContainer.appendChild(card);
           return {
             name: fullName,
             element: card,

@@ -22,21 +22,6 @@
         </div>
     </ul>
 
-    <script>
-       let menu = document.getElementById("dropdownMenu");
-       let button = document.getElementById("dropdownMenuButton");
-        function toggleDropdown() {
-            //add click event listener
-            if (menu.style.display === "none" || menu.style.display === "") {
-                menu.style.display = "block";
-            } else {
-                menu.style.display = "none";
-            }
-            
-        }
-
-
-    </script>
     <!-- Main content section will be replaced by the content block -->
     <main style="flex-grow: 1;">
         {% block content %}
@@ -51,22 +36,11 @@
         <a href="/contact" class="footer-link">Contact</a>
       </footer>
 
-<script>
-    //get users time zone
-    document.addEventListener("DOMContentLoaded", function() {
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      
-        // Send to backend if not already set
-        fetch("/set_timezone", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ timezone: timezone })
-        });
-    });
-</script>
+
     
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+<script src="{{ url_for('static', filename='functions.js') }}"></script>
+
 <style>
     /* RESET STYLES */
 * {

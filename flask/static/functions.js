@@ -48,7 +48,8 @@ function showProfile(user, card) {
       });
     }
 
-function searchUser(){
+function searchUser(users){
+  const searchInput = document.querySelector("[data-search]");
     // Search input filtering
 searchInput.addEventListener("input", (event) => {
     const value = event.target.value;
