@@ -18,12 +18,43 @@ class UpdateWorkoutForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired(), Length(min=1, max=200)])
     exercise = SelectField('Exercise', 
         validators=[DataRequired()], 
-        choices=[
-        ("run", "Running"),
-        ("bike", "Biking"),
-        ("swim", "Swimming"),
-        ("lift", "Weight Lifting")
-    ])
+            choices=[
+            ("",""),
+            ("baseball", "Baseball"),
+            ("basketball", "Basketball"),
+            ("biking", "Biking"),
+            ("boxing", "Boxing"),
+            ("climbing", "Climbing"),
+            ("dance", "Dance"),
+            ("disc-sports", "Disc Sports"),
+            ("elliptical", "Elliptical"),
+            ("football", "Football"),
+            ("golf", "Golf"),
+            ("gymnastics", "Gymnastics"),
+            ("hiking", "Hiking"),
+            ("hiit", "High Intensity Interval Training"),
+            ("hockey", "Hockey"),
+            ("lacrosse", "Lacrosse"),
+            ("pilates", "Pilates"),
+            ("rowing", "Rowing"),
+            ("rugby", "Rugby"),
+            ("running", "Running"),
+            ("skating", "Skating"),
+            ("skiing", "Skiing"),
+            ("snowboarding", "Snowboarding"),
+            ("soccer", "Soccer"),
+            ("softball", "Softball"),
+            ("stair-stepper", "Stair Stepper"),
+            ("strength-training", "Strength Training"),
+            ("surfing", "Surfing"),
+            ("swimming", "Swimming"),
+            ("tennis", "Tennis"),
+            ("volleyball", "Volleyball"),
+            ("walking", "Walking"),
+            ("weight-lifting", "Weight Lifting"),
+            ("wrestling", "Wrestling"),
+        ]
+)
     date = DateTimeLocalField('Date and Time', validators=[DataRequired()])
     hours = IntegerField("Hours", validators=[Optional(), NumberRange(min=0)])
     minutes = IntegerField("Minutes", validators=[Optional(), NumberRange(min=0, max=59)])

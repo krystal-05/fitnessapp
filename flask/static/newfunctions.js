@@ -102,6 +102,7 @@ export function searchWorkout(workouts){
             //returns a boolean for the selected workout- checks if user's input value exists
             const isVisible = workout.exercise.toLowerCase() === selectedValue;
             workout.element.style.display = isVisible ? "block" : "none";
+            console.log("Exercise dropdown:", exerciseOption);
         });
     });
     

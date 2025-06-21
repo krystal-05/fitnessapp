@@ -1,6 +1,6 @@
 import { UserCard } from './usercard.js';
 import { WorkoutCard } from './workoutcard.js';
-import { convertTimezone, convertUnits, searchUser, searchWorkout } from './newfunctions.js';
+import {searchUser, searchWorkout } from './newfunctions.js';
 
 // ---------- BASE HTML CONTENT ----------
 let menu = document.getElementById("dropdownMenu");
@@ -87,9 +87,7 @@ if (requestTemplate && requestContainer) {
         const userCard = new UserCard(
           user,
           requestTemplate,
-          mode,
-          convertTimezone,
-          convertUnits
+          mode
         );
         const card = userCard.getElement();
         card.style.display = "block";
@@ -111,9 +109,7 @@ if (friendTemplate && friendContainer) {
         const userCard = new UserCard(
           user,
           friendTemplate,
-          mode,
-          convertTimezone,
-          convertUnits
+          mode
         );
         const card = userCard.getElement();
         card.style.display = "flex";

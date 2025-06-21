@@ -202,6 +202,9 @@ def view_other_user(user_id):
 
 @app.route("/view_other_user_api/<int:user_id>", methods = ["POST", "GET"])
 def view_other_user_api(user_id):
+    if "user" not in session:
+        return jsonify({"error": "Not logged in"})
+
     user = User.query.get(user_id) 
 
     #total activites, active minutes, and streak code
@@ -262,6 +265,9 @@ def search_users():
 # Route to return the JSON data for fetch()
 @app.route("/api_search_users")
 def api_search_users():
+    if "user" not in session:
+        return jsonify({"error": "Not logged in"})
+
     if "user" in session:
         users = User.query.all()
         user_id = session.get("user")
@@ -451,6 +457,9 @@ def view_friends():
 
 @app.route("/api_friends", methods=["GET","POST"])
 def api_view_friends():
+    if "user" not in session:
+        return jsonify({"error": "Not logged in"})
+
     user_id = session["user"]
     user = User.query.get(user_id)
     friends = user.friends
@@ -488,6 +497,9 @@ def save_picture(form_picture):
 
 @app.route("/update_profile", methods=["GET", "POST"])
 def update_profile():
+    if "user" not in session:
+        return jsonify({"error": "Not logged in"})
+
      # Get the full User object
     user_id = session["user"]
     user = User.query.get(user_id) 
@@ -564,6 +576,9 @@ def get_local_time():
 
 @app.route("/add_workout", methods=["GET", "POST"])
 def add_workout():
+    if "user" not in session:
+        return jsonify({"error": "Not logged in"})
+
     if request.method == "POST":
         user_id = session["user"]
 
@@ -619,6 +634,9 @@ def api_view_workouts():
 
 @app.route("/edit_workout/<int:workout_id>", methods=["GET","POST"])
 def edit_workout(workout_id):
+    if "user" not in session:
+        return jsonify({"error": "Not logged in"})
+
     workout = Workout.query.get(workout_id)
     form = UpdateWorkoutForm()
 
@@ -702,6 +720,21 @@ def api_feed():
             "workouts": workouts_data
         })
     return jsonify(users=friends_list)
+
+# @app.route("/awards")
+# def awards():
+#     return render_template("awards.html")
+
+# @app.route("/api_awards")
+# def api_awards():
+#     if "user" not in session:
+#         return jsonify({"error": "Not logged in"})
+ 
+#     predefined_awards = [
+ 
+
+#     ]
+
 
 
 if __name__ == "__main__":
