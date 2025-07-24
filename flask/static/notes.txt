@@ -1,0 +1,3 @@
+things that i need to work on 
+i need to be able to view challenge details 
+ensure that points are being added and the workouts are associating with the challenge 

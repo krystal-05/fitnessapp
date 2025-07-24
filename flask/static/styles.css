@@ -67,3 +67,6 @@ body {
   .friend_status button:hover {
     background-color: #3e8e41;
   }
+  .invite-card{
+    display: "flex";
+  }

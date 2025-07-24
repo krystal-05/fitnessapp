@@ -1,5 +1,7 @@
 import { UserCard } from './usercard.js';
 import { WorkoutCard } from './workoutcard.js';
+import { ChallengeCard } from './challengeCard.js';
+import { InviteCard } from './inviteCard.js';
 import {searchUser, searchWorkout } from './newfunctions.js';
 
 // ---------- BASE HTML CONTENT ----------
@@ -91,7 +93,7 @@ if (requestTemplate && requestContainer) {
         );
         const card = userCard.getElement();
         card.style.display = "block";
-        requestContainer.appendChild(userCard.getElement());
+        requestContainer.appendChild(card);
       });
     });
 }
@@ -113,9 +115,9 @@ if (friendTemplate && friendContainer) {
         );
         const card = userCard.getElement();
         card.style.display = "flex";
-        friendContainer.appendChild(userCard.getElement());
+        friendContainer.appendChild(card);
         return {
-          name: fullName,
+          name: getFullName(),
           element: card,
           friend_status: user.friend_status
         };
@@ -216,3 +218,103 @@ if (workoutCardTemplate && workoutCardContainer) {
       searchWorkout(workouts);
     });
 }
+
+// ---------- CHALLENGE PAGE / CHALLENGE SECTION ----------
+const notStartedTemplate = document.querySelector("[data-not-started-template]");
+const inProgressTemplate = document.querySelector("[data-in-progress-template]");
+const finishedTemplate = document.querySelector("[data-finished-template]");
+
+const notStartedContainer = document.getElementById("notStartedContainer");
+const inProgressContainer = document.getElementById("inProgressContainer");
+const finishedContainer = document.getElementById("finishedContainer");
+
+if (
+  notStartedContainer && notStartedTemplate &&
+  inProgressContainer && inProgressTemplate &&
+  finishedContainer && finishedTemplate
+) {
+  fetch("/display_all_challenges")
+  .then(response => {
+    console.log("Fetch response status:", response.status);
+    if (!response.ok) {
+      throw new Error("Server error: " + response.status);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log("Challenge data received:", data);
+
+    // Not Started Challenges
+    if (Array.isArray(data.not_started_challenges)) {
+      data.not_started_challenges.forEach((challenge, index) => {
+        console.log(`Not Started Challenge ${index}:`, challenge);
+        const type = "not started";
+        const card = new ChallengeCard(challenge, notStartedTemplate, finishedContainer, type).getElement();
+        console.log("Card created:", card);
+        notStartedContainer.appendChild(card);
+      });
+    } else {
+      console.warn("No not_started_challenges array found");
+    }
+
+    // In Progress Challenges
+    if (Array.isArray(data.in_progress_challenges)) {
+      data.in_progress_challenges.forEach((challenge, index) => {
+        console.log(`In Progress Challenge ${index}:`, challenge);
+        const type = "in progress";
+        const card = new ChallengeCard(challenge, inProgressTemplate, finishedContainer, type).getElement();
+        console.log("Card created:", card);
+        inProgressContainer.appendChild(card);
+      });
+    } else {
+      console.warn("No in_progress_challenges array found");
+    }
+
+    // Finished Challenges
+    if (Array.isArray(data.finished_challenges)) {
+      data.finished_challenges.forEach((challenge, index) => {
+        console.log(`Finished Challenge ${index}:`, challenge);
+        const type = "finished";
+        const card = new ChallengeCard(challenge, finishedTemplate, finishedContainer, type).getElement();
+        console.log("Card created:", card);
+        finishedContainer.appendChild(card);
+      });
+    } else {
+      console.warn("No finished_challenges array found");
+    }
+  })
+  .catch(error => {
+    console.error("Fetch failed:", error);
+  });
+} 
+// ---------- CHALLENGE PAGE / INVITE SECTION ----------
+const inviteTemplate = document.querySelector("[data-invite-card]");
+const inviteContainer = document.getElementById("inviteContainer");
+if (inviteContainer && inviteTemplate){
+
+  fetch("/api_challenge_invites")
+    .then(response => response.json())
+    .then(data => {
+      console.log("Invite data:", data);
+      data.invites.forEach(challenge => {
+        const card = new InviteCard(challenge, inviteTemplate, inviteContainer).getElement();
+        inviteContainer.appendChild(card);
+      });
+    })
+    .catch(err => console.error("Failed to fetch invites:", err));
+}
+// ---------- CHALLENGE PAGE / CREATE CHALLENGE SECTION ----------
+//use window. function name to define the function that will be used in the HTML
+window.filterCheckboxes = function(input, containerId) {
+  const filter = input.value.toLowerCase();
+  const container = document.getElementById(containerId);
+  const checkboxes = container.querySelectorAll(".form-check");
+  const regex = new RegExp(filter, "i");
+
+  checkboxes.forEach(function (checkbox) {
+    const label = checkbox.textContent.toLowerCase().trim();
+    checkbox.style.display = regex.test(label) ? "block" : "none";
+  });
+};
+
+

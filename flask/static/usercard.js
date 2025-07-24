@@ -53,6 +53,10 @@ renderByMode(){
         case "friends":
             this.setupFriendButton();
             break;
+        default:
+            console.warn("Unexpected mode:", mode);
+            break;
+
     }
 }
 setupFriendButton() {

@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+
+
+<!-- this file will display options to create a challenge, accept challenge
+ invites, and view all challenges. When the user clicks on the page, the not started
+ and in progress challenges will display, as well as challenges completed in the previous week.
+ There will be a button to view all completed challenges. 
+ There will be a button to create a challenge, and a button to accept/reject invite
+ Invites will display automatically. -->
+
+ <div class="container-fluid mt-4">
+    <div class="row">
+      
+    <!-- LEFT SIDE: Invite cards + Challenge form -->
+    <div class="col-md-8">
+        
+        <!-- Invite card -->
+         <div id="inviteContainer"></div>
+        <template data-invite-card>
+        <div class="invite-card card mb-4">
+          <div class="card-body">
+            <h5 class="title" challenge-title>Challenge Title</h5>
+            <h4 class="exercises" challenge-exercises>Exercises: </h4>
+            <h4 class="invited-users" invited-users>Invited Users: </h4>
+            <button type="button" class="btn btn-primary me-2" accept-button>Accept</button>
+            <button type="button" class="btn btn-secondary" reject-button>Reject</button>
+          </div>
+        </div>
+      </template>
+        <!-- Flask-WTF challenge form -->
+
+        <form method="POST" action="{{ url_for('challenges') }}">
+          <div class="card" style="min-height: 100vh;">
+            <div class="card-body d-flex flex-column" style="min-height: 100vh;">
+          
+
+              {{ form.hidden_tag() }}
+              <h5 class="mb-4">Create New Challenge</h5>
+        
+              <!-- Title -->
+              <div class="form-group mb-3">
+                {{ form.title.label(class="form-label") }}
+                {{ form.title(class="form-control", placeholder="Enter a challenge title") }}
+                {% if form.title.errors %}
+                  <div class="text-danger">{{ form.title.errors[0] }}</div>
+                {% endif %}
+              </div>
+        
+              <!-- Exercises (Collapsible Checkboxes) -->
+              <div class="form-group mb-3">
+                <label class="form-label">{{ form.exercises.label }}</label>    
+
+                <!-- Search input -->
+                <input type="text" class="form-control mb-3" placeholder="Search exercises..." onkeyup="filterCheckboxes(this, 'exerciseCheckboxList')">
+
+                  <div id="exerciseCheckboxList" class="border rounded p-2">
+                    {% for subfield in form.exercises %}
+                      <div class="form-check">
+                        {{ subfield(class="form-check-input") }}
+                        {{ subfield.label(class="form-check-label") }}
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+                {% if form.exercises.errors %}
+                  <div class="text-danger">{{ form.exercises.errors[0] }}</div>
+                {% endif %}
+              </div>
+
+              <!-- Invite friends (collapsible checkboxes) -->
+              
+              <div class="form-group mb-3">
+                <label class="form-label">{{ form.invited_friends.label }}</label>
+              
+                <!-- Search input -->
+                <input type="text" class="form-control mb-3" placeholder="Search friends..." onkeyup="filterCheckboxes(this, 'friendCheckboxList')">
+              
+                <!-- Checkbox container -->
+                <div id="friendCheckboxList" class="border rounded p-2">
+                  {% for subfield in form.invited_friends %}
+                    <div class="form-check">
+                      {{ subfield(class="form-check-input") }}
+                      {{ subfield.label(class="form-check-label") }}
+                    </div>
+                  {% endfor %}
+                </div>
+              
+                {% if form.invited_friends.errors %}
+                  <div class="text-danger">{{ form.invited_friends.errors[0] }}</div>
+                {% endif %}
+              </div>
+              
+              <!-- Start Date -->
+              <div class="form-group mb-3">
+                {{ form.start_date.label(class="form-label") }}
+                {{ form.start_date(class="form-control", type="date") }}
+                {% if form.start_date.errors %}
+                  <div class="text-danger">{{ form.start_date.errors[0] }}</div>
+                {% endif %}
+              </div>
+        
+              <!-- Duration -->
+              <div class="form-group mb-3">
+                {{ form.duration.label(class="form-label") }}
+                {{ form.duration(class="form-control", placeholder="Enter number of days") }}
+                {% if form.duration.errors %}
+                  <div class="text-danger">{{ form.duration.errors[0] }}</div>
+                {% endif %}
+              </div>
+        
+              <!-- Challenge Descriptions -->
+              <div class="form-group mb-3">
+                {% for challenge in challenges %}
+                  <p><strong>Description:</strong> {{ challenge.description }}</p>
+                {% endfor %}
+              </div>
+        
+              {{ form.submit(class="btn btn-success") }}
+              {% if form.submit.errors %}
+              <div class="text-danger">{{ form.submit.errors[0] }}</div>
+            {% endif %}
+          </div>
+            </div>
+          </div>
+        </form>
+    </div>
+  
+        <!-- RIGHT SIDE: Challenge sections -->
+        <div class="col-md-4">
+            <div class="sticky-top" style="top: 20px;">
+        
+<!-- Not Started -->
+<div id="notStartedContainer"></div>
+<template data-not-started-template>
+  <div class="card mb-3">
+    <div class="card-header bg-warning fw-bold text-dark">Not Started</div>
+    <div class="card-body p-2 card-content">
+      <h5 challenge-title></h5>
+      <p challenge-exercises></p>
+      <p challenge-start></p>
+      <p challenge-duration></p>
+      <p challenge-invited-users></p>
+      <button class="btn btn-outline-primary btn-sm" view-challenge-tag>View Challenge</button>
+    </div>
+  </div>
+</template>
+
+<!-- In Progress -->
+<div id="inProgressContainer"></div>
+<template data-in-progress-template>
+  <div class="card mb-3">
+    <div class="card-header bg-primary text-white fw-bold">In Progress</div>
+    <div class="card-body p-2 card-content">
+      <h5 challenge-title></h5>
+      <p challenge-exercises></p>
+      <p challenge-days-left></p>
+      <p challenge-users></p>
+      <ul challenge-points></ul>
+      <button class="btn btn-outline-primary btn-sm" view-challenge-tag>View Challenge</button>
+    </div>
+  </div>
+</template>
+
+<!-- Finished -->
+<div id="finishedContainer"></div>
+<template data-finished-template>
+  <div class="card mb-3">
+    <div class="card-header bg-success text-white fw-bold">Finished</div>
+    <div class="card-body p-2 card-content">
+      <h5 challenge-title></h5>
+      <p challenge-exercises></p>
+      <p challenge-users></p>
+      <p challenge-winner></p>
+      <ul challenge-points></ul>
+      <button class="btn btn-outline-primary btn-sm" view-challenge-tag>View Challenge</button>
+    </div>
+  </div>
+</template>
+
+<!-- Vertically centered modal -->
+<div class="modal-dialog modal-dialog-centered">
+  ...
+</div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+<script type="module" src="/static/newmain.js"></script>
+<script type="module" src="/static/newfunctions.js"></script>
+
+{% endblock %}
